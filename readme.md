@@ -1,4 +1,4 @@
-# brainf*ck interpreter weighting at an unimpressive 87 lines of c
+# brainf*ck interpreter weighting at an unimpressive 96 lines of c
 
 Anyways it is a learning project. Maybe in the future I will try to:
 

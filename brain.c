@@ -33,6 +33,8 @@ size_t findCb(size_t ptr, char *code) {
 		}
 		i++;
 	}
+	fprintf(stderr, "syntax error\n");
+	exit(1);
 }
 
 size_t findOb(size_t ptr, char *code) {
@@ -50,9 +52,15 @@ size_t findOb(size_t ptr, char *code) {
 		}
 		i--;
 	}
+	fprintf(stderr, "syntax error\n");
+	exit(1);
 }
 
 int main(int argc, char **argv) {
+	if (argc != 2) {
+		fprintf(stderr, "provide a file and a file only\n");
+		return 1;
+	}
 	(void) argc;
 	uint8_t stack[30000] = {0};
 	FILE *f = fopen(argv[1], "r");
@@ -84,4 +92,5 @@ int main(int argc, char **argv) {
 	}
 
 	free(buf);
+	return 0;
 }
