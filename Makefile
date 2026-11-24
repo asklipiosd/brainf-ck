@@ -3,7 +3,5 @@ CC    :=              gcc
 
 .PHONY: run
 
-brain: brain.c
-	${CC} ${FLAGS} brain.c -o brain
-run: brain
-	./brain
+run:
+	${CC} ${FLAGS} brain.c ir.c -o brain
