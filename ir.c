@@ -46,53 +46,63 @@ bool isIns(char c) {
 	return false;
 }
 
-size_t findCb(size_t ptr, char *code) {
+size_t findCb(size_t ptr, list l) {
 	size_t i = ptr;
-	size_t indx = ptr;
 	int count = 0;
 
-	while (code[i] != '\0') {
-		switch (code[i]) {
-		case '[': count++; break;
-		case ']': count--; break;
+	while (true) {
+		switch (l.buf[i].ins) {
+		case OB: count++; break;
+		case CB: count--; break;
 		default :          break;
 		}
 		if (count == 0) {
-			return indx;
+			return i;
 		}
 		i++;
-		if (isIns(code[i])) {
-			continue;
-		}
-		indx++;
 	}
 	fprintf(stderr, "syntax error\n");
 	exit(1);
 }
 
-size_t findOb(size_t ptr, char *code) {
+size_t findOb(size_t ptr, list l) {
 	size_t i = ptr;
-	size_t indx = ptr;
 	int count = 0;
 
-	while (i != 0) {
-		switch (code[i]) {
-		case '[': count--; break;
-		case ']': count++; break;
+	while (true) {
+		switch (l.buf[i].ins) {
+		case  OB: count--; break;
+		case  CB: count++; break;
 		default :          break;
 		}
 		if (count == 0) {
 			return i;
 		}
 		i--;
-		if (isIns(code[i])) {
-			continue;
-		}
-		indx--;
 	}
 	fprintf(stderr, "syntax error\n");
 	exit(1);
 }
+
+
+list minIr(list old) {
+	list l;
+	initIr(&l);
+	instruction lastIns = OB;
+
+	for (size_t i = 0; i < old.len; i++) {
+		if (old.buf[i].ins != CB &&
+ 			old.buf[i].ins != OB &&
+			old.buf[i].ins == lastIns) {
+			l.buf[l.len - 1].am += old.buf[i].am;
+		} 
+		else {appendIns(&l, old.buf[i]);}
+		lastIns = old.buf[i].ins;
+	}
+	
+	return l;
+}
+
 
 list genIr(char *argv) {
 	FILE *f = fopen(argv, "r");
@@ -113,13 +123,24 @@ list genIr(char *argv) {
 		case '-': appendIns(&l,(ins) {.ins = INC, .am = -1});             break;
 		case '.': appendIns(&l,(ins) {.ins = OUT, .am =  0});             break;
 		case ',': appendIns(&l,(ins) {.ins = INP, .am =  0});             break;
-		case '[': appendIns(&l,(ins) {.ins =  OB, .am = findCb(i, buf)}); break;
-		case ']': appendIns(&l,(ins) {.ins =  CB, .am = findOb(i, buf)}); break;
-		default :                                                                 break;
+		case '[': appendIns(&l,(ins) {.ins =  OB, .am =  0});             break;
+		case ']': appendIns(&l,(ins) {.ins =  CB, .am =  0});             break;
+		default :                                                         break;
 		}
 	}
 	
 	free(buf);
 	fclose(f);
-	return l;
+	list new  = minIr(l);
+	free(l.buf);
+
+	for (size_t i = 0; i < new.len; i++) {
+		switch(new.buf[i].ins) {
+		case  OB: new.buf[i].am = findCb(i ,new); break;
+		case  CB: new.buf[i].am = findOb(i ,new); break;
+		default :          break;
+		}
+	}
+
+	return new;
 }

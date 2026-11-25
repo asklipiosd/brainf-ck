@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
 		case INP: stack[ptr] = getc(stdin); break;
 		}
 	}
-
 	free(l.buf);
+	putc('\n', stdout);
 	return 0;
 }
